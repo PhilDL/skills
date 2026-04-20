@@ -147,7 +147,7 @@ description: {description}
 metadata:
   author: Anthony Fu
   version: "2026.1.1"
-  source: Generated from {source-url}, scripts located at https://github.com/antfu/skills
+  source: Generated from {source-url}, scripts located at https://github.com/phildl/skills
 ---
 
 > The skill is based on {project} v{version}, generated at {date}.
