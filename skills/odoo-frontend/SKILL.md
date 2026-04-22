@@ -1,19 +1,19 @@
 ---
 name: odoo-frontend
-description: "Use when creating, editing, debugging, or reviewing Odoo 19 frontend or web-client code in JavaScript, XML, QWeb, or frontend addon assets: `@odoo-module`, `@web/...` imports, `web.assets_backend`, services, registries, hooks, systray items, client actions, command-palette actions, lazy client actions, browser-backed frontend state, patches, generic components, view architecture, built-in or custom views, `js_class`, `searchModel`, field widgets, view widgets, arch XML, modifiers, `options=`, or XPath inheritance. Triggers include `useService`, `browser.localStorage`, `LazyComponent`, `loadJS`, `searchModel.createNewFilters`, `fuzzyLookup`, `command_provider`, `patch`, `registry.category(\"views\"|\"fields\"|\"view_widgets\"|\"systray\"|\"lazy_components\")`, `ArchParser`, `Controller`/`Renderer`/`Model`, `buildM2OFieldDescription`, `standardFieldProps`, `standardWidgetProps`, `kanban`, `list`, `form`, `graph`, `pivot`, `calendar`, `search`, `xpath`, and `field widget=`. Pair with `owl` for Owl internals and `odoo-19-javascript-testing` for Hoot, web test helpers, and mock-server work. Do not use for broader backend ORM or server-side business logic."
+description: "Use when creating, editing, debugging, or reviewing Odoo 19 web-client customizations in JavaScript or arch XML: asset bundles, `@odoo-module` imports, registries, systray items, client actions, command providers, browser-backed frontend state, `patch(...)`, view descriptors, `js_class`, `searchModel`, built-in or custom views, field widgets, view widgets, modifiers, `options=`, or XPath inheritance. Pair with `owl` for Owl internals and `odoo-19-javascript-testing` for Hoot and web test helpers. Do not use for backend ORM or generic Owl/JavaScript concepts."
 metadata:
   author: Philippe L'ATTENTION
   version: "2026.4.22"
-  source: Generated from https://github.com/odoo/documentation, merged with source-verified view references from https://github.com/odoo/odoo, expanded with tutorial-derived frontend patterns from master_odoo_web_framework, and cross-checked against local solution addons in `sources/odootutorials`; scripts located at https://github.com/phildl/skills
+  source: Generated from https://github.com/odoo/documentation, merged with source-verified view references from https://github.com/odoo/odoo, expanded with tutorial-derived frontend patterns from master_odoo_web_framework, cross-checked against local solution addons in `sources/odootutorials`, then manually trimmed to the highest-signal agent guidance; scripts located at https://github.com/phildl/skills
 ---
 
-> The skill is based on Odoo 19.0 documentation, source-verified view references, tutorial-derived frontend patterns, and local solved tutorial addons, merged at 2026-04-22.
+> The skill is based on Odoo 19.0 documentation, source-verified view references, tutorial-derived frontend patterns, and local solved tutorial addons, then trimmed on 2026-04-22 to keep only high-signal Odoo-specific frontend guidance.
 
 # Odoo 19 Frontend
 
-This skill covers the Odoo 19 frontend surface as one skill: web-client runtime, frontend JavaScript, views, widgets, arch XML, and XPath inheritance. Start from the narrowest reference that matches the task, and load examples only when you need paste-ready scaffolding.
+This skill is for Odoo-specific extension points and parser quirks, not for generic frontend theory. Start from the narrowest reference that matches the task, and load examples only when you need paste-ready scaffolding.
 
-It intentionally stops at frontend-facing Python glue for views such as `selection_add`, `_get_view_info`, `ir.actions.act_window.view`, and XML arch authoring. For broader backend ORM or business logic work, read the target module directly until a dedicated backend skill exists.
+It intentionally omits material an agent should already know or can recover cheaply from local code: generic Owl semantics, generic services/hooks/components, classical QWeb basics, editor/mobile APIs, and JS testing APIs.
 
 ## Quick Route
 
@@ -21,29 +21,19 @@ Do not read every reference up front. Start from the slice that matches the task
 
 | If the task is about... | Read |
 | --- | --- |
-| Web client architecture, env, action context, `Domain`, `evaluateExpr`, `env.bus`, debug modes, client actions | [core-architecture-runtime](references/core-architecture-runtime.md) |
 | Asset bundles, manifest operations, lazy asset loading, named lazy bundles, `LazyComponent`, `loadJS`, `@odoo-module`, aliases, import rules | [core-assets-and-modules](references/core-assets-and-modules.md) |
-| `useService`, `orm` vs `rpc`, notifications, router, effect, title, user service | [core-services](references/core-services.md) |
-| Systray items, popover client actions, command-palette actions, shared frontend state, `Reactive` models, browser-backed persistence | [features-client-actions-and-shared-state](references/features-client-actions-and-shared-state.md) |
 | Registry categories, sequence ordering, systray, `main_components`, `command_provider`, `lazy_components`, action registry | [core-registries-and-extension-points](references/core-registries-and-extension-points.md) |
-| Odoo-provided hooks like `useBus`, `usePosition`, `usePager`, `useSpellCheck` | [features-hooks](references/features-hooks.md) |
-| Odoo generic components such as `Dropdown`, `Notebook`, `SelectMenu`, `Pager`, `TagsList` | [features-generic-components](references/features-generic-components.md) |
+| Systray items, popover client actions, command-palette actions, shared service state, `Reactive` models, browser-backed persistence | [features-client-actions-and-shared-state](references/features-client-actions-and-shared-state.md) |
 | Safe, minimal use of `patch(...)` | [features-patching-code](references/features-patching-code.md) |
-| Error service, `error_handlers`, Owl `onError`, expected vs unexpected failures | [features-error-handling](references/features-error-handling.md) |
-| Classical QWeb, template inheritance, debug hooks, `core.qweb.render` | [features-qweb-templates](references/features-qweb-templates.md) |
-| Odoo Editor Powerbox or mobile bridge APIs | [features-editor-and-mobile](references/features-editor-and-mobile.md) |
 | View descriptor, `Controller` / `Renderer` / `Model` / `ArchParser`, or `WithSearch` resolution | [view-architecture](references/view-architecture.md) |
 | Build a brand-new view type or customize one via `js_class` | [view-registration](references/view-registration.md), then [custom-view-minimal](examples/custom-view-minimal.md) or [gallery-view-full](examples/gallery-view-full.md) |
 | Extend a built-in kanban with a sidebar, `searchModel`, `fuzzyLookup`, or `t-model` | [advanced-kanban-customization](references/advanced-kanban-customization.md) |
-| Built-in view archs for `kanban`, `graph`, `pivot`, `calendar`, `activity`, `hierarchy`, `search` | [built-in-views](references/built-in-views.md) |
+| Built-in view archs for `kanban`, `graph`, `pivot`, `calendar`, `search` | [built-in-views](references/built-in-views.md) |
 | Root tags, modifiers, `options=`, `groups=`, or removed `attrs=` / `states=` patterns | [arch-xml](references/arch-xml.md) |
 | Add, move, replace, or mutate nodes with XPath inheritance | [view-inheritance](references/view-inheritance.md), then [view-inheritance example](examples/view-inheritance.md) |
 | Author a custom `<field widget="...">` | [field-widgets](references/field-widgets.md), then [field-widget example](examples/field-widget.md) |
 | Author a custom `<widget name="...">` | [view-widgets](references/view-widgets.md), then [view-widget example](examples/view-widget.md) |
-| Enterprise-only view types (`gantt`, `map`, `cohort`, `grid`) | [enterprise-views](references/enterprise-views.md) |
-| Full gallery-view walkthrough and provenance notes | [custom-view-tutorial](references/custom-view-tutorial.md) |
-| Where JS tests live, how they are bundled, and where to run them | [testing-unit-test-entry](references/testing-unit-test-entry.md) |
-| Final review pass before shipping frontend code | [best-practices-frontend-workflow](references/best-practices-frontend-workflow.md), then [best-practices](references/best-practices.md) for view-specific checks |
+| Need a full custom-view scaffold instead of a minimal one | [gallery-view-full](examples/gallery-view-full.md) |
 
 ## Mental Model
 
@@ -59,7 +49,7 @@ A view is five pieces glued together by `registry.category("views")`:
 
 A sixth optional `Compiler` converts arch XML into Owl templates at runtime for views such as `form` and `kanban`. Use [view-architecture](references/view-architecture.md) for the full descriptor catalogue and runtime resolution path.
 
-## Red flags — arch mistakes that hard-fail or silently break
+## Red Flags
 
 | Pattern | Status | Fix |
 | --- | --- | --- |
@@ -71,28 +61,24 @@ A sixth optional `Compiler` converts arch XML into Owl templates at runtime for 
 | Mutating `record.data` directly | Bypasses model machinery | Use `record.update({...})` |
 | Reading raw arch attrs inside a component | Leaks parsing concerns into rendering | Parse in `extractProps` and pass clean props |
 | Custom widget without standard props | Breaks prop validation and runtime expectations | Spread `standardFieldProps` or `standardWidgetProps` |
- | New file under */static/src/ not referenced in __manifest__.py | Loads 0 bytes at runtime (silent — typecheck passes). | Add to assets.web.assets_backend in the same diff. |
+| New file under `static/src/` not referenced in `__manifest__.py` | Loads 0 bytes at runtime | Add it to the right asset bundle in the same diff |
 
-## Core Runtime References
+## Working Style
+
+- Start by reading the target addon's `__manifest__.py`, XML arch, and existing `static/src` files. In Odoo, most frontend bugs are wiring mistakes before they are logic mistakes.
+- Prefer registries, descriptor overrides, or composition before `patch(...)`.
+- For `js_class` customizations, spread the built-in descriptor instead of copying it.
+- Parse arch attributes and options in `extractProps`; keep components ignorant of raw arch XML.
+- Use the examples as scaffolding, not as canonical contracts. For exact behavior, read the nearest parser or descriptor in Odoo source.
+
+## Core References
 
 | Topic | Description | Reference |
 | --- | --- | --- |
-| Architecture Runtime | SPA structure, environment, contexts, Python expression helpers, domains, bus, browser facade, client actions | [core-architecture-runtime](references/core-architecture-runtime.md) |
-| Assets and Modules | Bundles, manifest directives, load order, lazy loading, ES-module transpilation, aliases, transpiler limits | [core-assets-and-modules](references/core-assets-and-modules.md) |
-| Services | Service contract, `useService`, `orm` vs `rpc`, notification/router/effect/title/user patterns | [core-services](references/core-services.md) |
-| Registries and Extension Points | Registry API, ordered categories, systray, `main_components`, actions, formatters/parsers | [core-registries-and-extension-points](references/core-registries-and-extension-points.md) |
-
-## Features
-
-| Topic | Description | Reference |
-| --- | --- | --- |
-| Hooks | Odoo-specific hooks on top of Owl: assets, autofocus, bus, pager, positioning, spellcheck | [features-hooks](references/features-hooks.md) |
-| Generic Components | Odoo-built UI primitives: ActionSwiper, CheckBox, ColorList, Dropdown, Notebook, Pager, SelectMenu, TagsList | [features-generic-components](references/features-generic-components.md) |
-| Client Actions and Shared State | Tutorial-derived patterns for systray items, popover tools, command-palette actions, shared service state, and browser persistence | [features-client-actions-and-shared-state](references/features-client-actions-and-shared-state.md) |
-| Patching Code | Safe patch timing, `super`, class vs prototype patching, unpatching for tests | [features-patching-code](references/features-patching-code.md) |
-| Error Handling | Error service flow, `error_handlers`, Owl `onError`, Promise rejection rules | [features-error-handling](references/features-error-handling.md) |
-| QWeb Templates | Classical QWeb directives, safe output, inheritance, JS debug hooks, `core.qweb` | [features-qweb-templates](references/features-qweb-templates.md) |
-| Editor and Mobile | Powerbox customization and the native mobile bridge APIs | [features-editor-and-mobile](references/features-editor-and-mobile.md) |
+| Assets and Modules | Bundles, manifest directives, lazy loading, named bundles, aliases, import rules, and loading failures | [core-assets-and-modules](references/core-assets-and-modules.md) |
+| Registries and Extension Points | Ordered registries, `actions`, `systray`, `command_provider`, `lazy_components`, and custom registry slots | [core-registries-and-extension-points](references/core-registries-and-extension-points.md) |
+| Client Actions and Shared State | Tutorial-derived patterns for client actions, systray items, shared service state, and browser persistence | [features-client-actions-and-shared-state](references/features-client-actions-and-shared-state.md) |
+| Patching Code | Safe patch timing, `super`, class vs prototype patching, and unpatching for tests | [features-patching-code](references/features-patching-code.md) |
 
 ## Views and Widgets
 
@@ -106,8 +92,6 @@ A sixth optional `Compiler` converts arch XML into Owl templates at runtime for 
 | View Inheritance | XPath positions, attribute combiners, `move`, and `mode="primary"` vs `extension` | [view-inheritance](references/view-inheritance.md) |
 | Field Widgets | `fields` registry, descriptor shape, `standardFieldProps`, `fieldDependencies`, writes | [field-widgets](references/field-widgets.md) |
 | View Widgets | `view_widgets` registry, descriptor shape, `standardWidgetProps`, widget parsing | [view-widgets](references/view-widgets.md) |
-| Enterprise Views | Publicly inferable guidance for `gantt`, `map`, `cohort`, and `grid` | [enterprise-views](references/enterprise-views.md) |
-| Custom View Tutorial | Gallery-view walkthrough notes reconciled across 18.0 docs and 19.0 source | [custom-view-tutorial](references/custom-view-tutorial.md) |
 
 ## Examples
 
@@ -119,45 +103,7 @@ A sixth optional `Compiler` converts arch XML into Owl templates at runtime for 
 | View Widget | Paste-ready custom `<widget name="banner">` example | [view-widget](examples/view-widget.md) |
 | View Inheritance | Common XPath snippets for adding, replacing, moving, and mutating nodes | [view-inheritance](examples/view-inheritance.md) |
 
-## Testing
-
-| Topic | Description | Reference |
-| --- | --- | --- |
-| Unit Test Entry | File placement, naming, asset bundle wiring, `/web/tests`, and when to switch to the dedicated testing skill | [testing-unit-test-entry](references/testing-unit-test-entry.md) |
-
-## Best Practices
-
-| Topic | Description | Reference |
-| --- | --- | --- |
-| Frontend Workflow | High-signal checklist for modules, bundles, services, translations, session data, patches, and testing | [best-practices-frontend-workflow](references/best-practices-frontend-workflow.md) |
-| Views and Widgets | View-authoring checklist covering arch XML, registration, widgets, state flow, and performance | [best-practices](references/best-practices.md) |
-
 ## Cross-Skill Guidance
 
 - Use the [owl skill](../owl/SKILL.md) when the task is about Owl component internals, lifecycle, reactivity, props, slots, or template semantics.
 - Use the [odoo-19-javascript-testing skill](../odoo-19-javascript-testing/SKILL.md) when the task needs Hoot assertions, `mountWithCleanup`, `mountView`, `defineModels`, or mock-server control.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/framework_overview.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_reference.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/assets.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_modules.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/services.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/registries.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/hooks.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/owl_components.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/patching_code.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/error_handling.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/qweb.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/odoo_editor.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/mobile.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/unit_testing.html
-- https://github.com/odoo/documentation/tree/19.0/content/developer/tutorials/master_odoo_web_framework
-- https://www.odoo.com/documentation/19.0/developer/reference/user_interface/view_architectures.html
-- https://github.com/odoo/odoo/tree/19.0/addons/web/static/src/views
-- https://github.com/odoo/odoo/tree/19.0/addons/web_hierarchy
-- https://github.com/odoo/tutorials/tree/19.0/awesome_gallery
-- `sources/odootutorials/awesome_clicker`
-- `sources/odootutorials/awesome_dashboard`
-- `sources/odootutorials/awesome_shelter`

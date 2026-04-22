@@ -2,7 +2,7 @@
 
 Everything you can (and can't) put in an arch, verified against `odoo/odoo@19.0`.
 
-> **Verification status:** root tags and modifiers verified against `odoo/odoo@19.0` open-source. Widget options in §6 verified against `addons/web/static/src/views/fields/`. Enterprise root tags (`<gantt>`, `<map>`, `<cohort>`, `<grid>`) **UNVERIFIED FOR 19.0** from public sources — see [enterprise-views.md](./enterprise-views.md).
+> **Verification status:** root tags and modifiers are verified against `odoo/odoo@19.0` open-source. Widget options in §6 are verified against `addons/web/static/src/views/fields/`. Enterprise-only root tags exist, but this skill does not carry a separate enterprise view reference.
 >
 > **Related references:**
 > - [view-registration.md](./view-registration.md) — adding a new root tag (`ir.ui.view.type`)
@@ -453,17 +453,4 @@ Source: `odoo/addons/base/rng/`. Only these:
 
 There is no RNG for `<form>`, `<kanban>`, `<qweb>`, `<hierarchy>`. Those are validated by Python methods in `ir_ui_view.py` (e.g. `_validate_tag_hierarchy` in `web_hierarchy`).
 
-Writing your own view type? You can optionally ship an RNG and register it with `@view_validation.validate('my_view')` (see `references/custom-view-tutorial.md` §12). Or do arch validation in `_validate_tag_my_view` like `web_hierarchy` does.
-
-## Files referenced
-
-- `addons/web/static/src/views/view_compiler.js`
-- `addons/web/static/src/views/form/form_compiler.js`
-- `addons/web/static/src/views/fields/field.js`
-- `addons/web/static/src/views/utils.js`
-- `addons/web/static/src/views/widgets/widget.js`
-- `addons/web/static/src/views/fields/{many2one,many2many_tags,image,boolean_toggle}/...`
-- `odoo/addons/base/models/ir_ui_view.py`
-- `odoo/addons/base/rng/common.rng`, `list_view.rng`, `activity_view.rng`
-- `addons/web/static/src/core/py_js/py.js`
-- `addons/web/static/src/core/domain.js`
+Writing your own view type? You can optionally ship an RNG and register it with `@view_validation.validate('my_view')`. Or do arch validation in `_validate_tag_my_view` like `web_hierarchy` does.

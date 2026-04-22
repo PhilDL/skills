@@ -1,75 +1,39 @@
 ---
 name: core-module-structure-and-data
-description: Manifest fields, recommended module layout, XML/CSV loading rules, and the practical meaning of `record`, `field`, `function`, `delete`, `noupdate`, and data-file ordering.
+description: Manifest fields, ordered XML/CSV loading, and the practical meaning of `record`, `function`, `delete`, and `noupdate` when maintaining Odoo backend modules.
 ---
 
 # Module Structure and Data Files
 
-Most Odoo backend work starts with two things: a module package and ordered data loading. If the manifest order is wrong or a record lacks a stable external ID, later inheritance and updates get brittle fast.
-
-## Minimal module skeleton
-
-```text
-my_module/
-├── __init__.py
-├── __manifest__.py
-├── models/
-│   ├── __init__.py
-│   └── my_model.py
-├── security/
-│   ├── ir.model.access.csv
-│   └── my_rules.xml
-├── data/
-│   └── my_data.xml
-├── views/
-│   └── my_views.xml
-├── report/
-│   ├── my_report.xml
-│   └── my_report_templates.xml
-└── demo/
-    └── demo.xml
-```
+Most breakage here is not "how do I write XML?" but "why did this load in the wrong order, stop updating, or become impossible to inherit cleanly?"
 
 ## Manifest fields that matter most
 
 ```python
 {
-    "name": "My Module",
-    "version": "1.0",
     "depends": ["base", "mail"],
     "data": [
         "security/ir.model.access.csv",
         "security/my_rules.xml",
-        "data/my_data.xml",
         "views/my_views.xml",
-        "report/my_report.xml",
     ],
     "demo": ["demo/demo.xml"],
-    "assets": {
-        "web.assets_backend": [
-            "my_module/static/src/js/my_file.js",
-        ],
-    },
-    "application": False,
-    "license": "LGPL-3",
+    "auto_install": False,
+    "external_dependencies": {"python": ["pandas"]},
+    "post_init_hook": "post_init_hook",
 }
 ```
-
-High-signal fields:
 
 - `depends`: module load graph. Always list what you extend or rely on.
 - `data`: files loaded on install and update.
 - `demo`: demo-only data.
-- `auto_install`: useful for link/integration modules.
+- `auto_install`: useful for glue/integration modules.
 - `external_dependencies`: declare Python or binary requirements.
-- `{pre_init, post_init, uninstall}_hook`: only when ORM/data files cannot reasonably do the job.
-- `assets`: static bundle wiring, even for backend-oriented addons that include reports or tours.
+- hooks: use only when ORM and declarative data cannot reasonably do the job.
 
-## Data files are sequential
+## Data files load sequentially
 
-The XML loader executes operations in order. Later operations can refer to earlier results, not the other way around.
-
-That makes stable external IDs non-optional for anything you may update, inherit, or reference later.
+Later operations can refer to earlier results, not the reverse. Stable external IDs are mandatory for anything you will update, inherit, or reference later.
 
 ## `noupdate` changes upgrade behavior
 
@@ -80,62 +44,31 @@ That makes stable external IDs non-optional for anything you may update, inherit
             <field name="name">My Rule</field>
         </record>
     </data>
-
-    <record id="my_server_action" model="ir.actions.server">
-        <field name="name">Always reloaded on update</field>
-    </record>
 </odoo>
 ```
 
 - `noupdate="1"` means install once, then preserve manual edits on module updates.
 - Plain operations outside `noupdate` reload during install and update.
 
-Use `noupdate` for seed data that administrators are expected to tweak. Do not hide essential structural changes inside it unless you are ready to manage upgrades manually.
+Use `noupdate` for records administrators are expected to customize. Do not place structural records there unless you want to own their upgrades forever.
 
-## Core XML operations
+## XML operations that are still worth remembering
 
-### Create or update records
+- `record`: create or update by external ID
+- `field ref="module.xmlid"`: explicit relational links
+- `field search="[(...)]"`: resolve relation by domain
+- `field eval="..."`: last resort, not the default
+- `function`: use only when declarative records are not enough
+- `delete`: remove by XML ID or by search domain
 
-```xml
-<record id="business_trip_form" model="ir.ui.view">
-    <field name="name">business.trip.form</field>
-    <field name="model">business.trip</field>
-    <field name="arch" type="xml">
-        <form string="Business Trip">
-            <field name="name"/>
-        </form>
-    </field>
-</record>
-```
-
-Useful `field` value modes:
-
-- body text: direct literal value
-- `ref="module.xmlid"`: relational references
-- `search="[(...)]"`: resolve relation by domain
-- `eval="..."`: last resort for Python expressions
-- `type="xml"` / `type="html"` / `type="int"` / `type="float"` / `type="base64"`: explicit conversions
-
-### Delete records
-
-```xml
-<delete model="ir.ui.view" id="my_module.legacy_view"/>
-```
-
-or by domain:
-
-```xml
-<delete model="mail.template" search="[('name', '=', 'Old template')]"/>
-```
-
-### Call model methods from data
+Example:
 
 ```xml
 <function model="res.partner" name="send_inscription_notice"
     eval="[[ref('partner_1'), ref('partner_2')]]"/>
 ```
 
-Reserve `function` for setup flows that really belong to server code. If static records are enough, prefer declarative data.
+Reserve `function` for setup flows that genuinely belong in Python. If static records are enough, keep them declarative.
 
 ## Shortcut tags worth knowing
 
@@ -143,18 +76,16 @@ Reserve `function` for setup flows that really belong to server code. If static 
 - `template`: shorter `ir.ui.view` definition for QWeb templates
 - `asset`: shorter `ir.asset` definition
 
-## CSV is for bulk simple records
-
-Use CSV when records are repetitive and flat. ACLs are the canonical example.
+## CSV is for repetitive flat records
 
 ```csv
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_business_trip_user,business.trip user,model_business_trip,base.group_user,1,1,1,0
 ```
 
-## Practical loading order
+ACLs are the canonical case.
 
-This is a pragmatic pattern rather than a rule from one specific page:
+## Practical loading order
 
 1. `security/ir.model.access.csv`
 2. security XML such as groups and rules
@@ -163,10 +94,4 @@ This is a pragmatic pattern rather than a rule from one specific page:
 5. reports
 6. demo data
 
-That ordering keeps references resolvable and avoids menus or actions pointing at missing security or views.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/module.html
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/data.html
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/actions.html
+That ordering avoids unresolved references and missing security around menus or actions.

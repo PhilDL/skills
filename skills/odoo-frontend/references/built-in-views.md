@@ -2,7 +2,7 @@
 
 Every claim below is sourced from the Odoo 19.0 branch of `odoo/odoo`. When a root attribute is listed, it is because the corresponding ArchParser reads it in the 19.0 source.
 
-> **Verification status:** all views in this file are in the open-source repo and verified against `odoo/odoo@19.0`. For private-repo enterprise views (gantt/map/cohort/grid) see [enterprise-views.md](./enterprise-views.md).
+> **Verification status:** all views in this file are in the open-source repo and verified against `odoo/odoo@19.0`. Enterprise-only views are intentionally omitted from this skill.
 >
 > **Related references:**
 > - [view-architecture.md](./view-architecture.md) — the descriptor + 5-piece model these examples instantiate
@@ -411,12 +411,3 @@ The `qweb` view type exists in the `ir.ui.view.type` Selection but is used for *
 ```
 
 Out of scope for this skill — see Odoo's [QWeb reports](https://www.odoo.com/documentation/19.0/developer/reference/backend/reports.html) docs for full reference.
-
-## Sources
-
-- `addons/web/static/src/views/view.js` — canonical ViewType JSDoc (line 75).
-- `addons/web/static/src/views/{list,form,kanban,graph,pivot,calendar,search}/` — implementation.
-- `addons/mail/static/src/views/web/activity/` — activity implementation.
-- `addons/web_hierarchy/` — hierarchy implementation (community in 19.0).
-- `odoo/addons/base/models/ir_ui_view.py` — `ir.ui.view.type` Selection.
-- Odoo 19 docs — View architectures: https://www.odoo.com/documentation/19.0/developer/reference/user_interface/view_architectures.html

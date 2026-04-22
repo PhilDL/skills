@@ -1,20 +1,15 @@
 ---
 name: features-qweb-reports
-description: QWeb HTML/PDF reports, report actions, translation patterns, paper formats, custom report models, and the asset rules that make report styling actually render.
+description: QWeb HTML/PDF reports, translation patterns, custom `_get_report_values`, paper formats, and the asset rules that make report styling actually render.
 ---
 
 # QWeb Reports
 
-Odoo reports are QWeb templates rendered as HTML or PDF, then optionally converted to PDF by `wkhtmltopdf`. Treat them like server-rendered documents, not like backend views or frontend SPA components.
+Keep only the report details that regularly break real output: context injection, translation rebrowse, and asset loading.
 
 ## Minimal report flow
 
-You need:
-
-1. an `ir.actions.report`
-2. a QWeb template whose external ID matches `report_name`
-
-Minimal template:
+You need an `ir.actions.report` and a QWeb template whose external ID matches `report_name`.
 
 ```xml
 <template id="report_business_trip">
@@ -31,20 +26,6 @@ Minimal template:
 </template>
 ```
 
-## Default template context
-
-Templates get:
-
-- `docs`
-- `doc_ids`
-- `doc_model`
-- `time`
-- `user`
-- `res_company`
-- `website`
-- `web_base_url`
-- `context_timestamp`
-
 ## Report action example
 
 ```xml
@@ -56,15 +37,6 @@ Templates get:
     <field name="binding_model_id" ref="model_business_trip"/>
 </record>
 ```
-
-Useful fields:
-
-- `report_type`: `qweb-pdf` or `qweb-html`
-- `paperformat_id`
-- `print_report_name`
-- `attachment_use`
-- `attachment`
-- `groups_id`
 
 ## Translation pattern
 
@@ -86,11 +58,11 @@ If you need translatable fields, re-browse in the target language inside the tra
 <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)"/>
 ```
 
-Do not re-browse in another language if you do not need translated fields. The docs call out the performance cost explicitly.
+Do not re-browse in another language unless you actually need translated fields.
 
 ## Custom report models
 
-For anything beyond the default `docs` context, define:
+Once you customize `_get_report_values`, `doc_ids`, `doc_model`, and `docs` are not injected automatically. Add them yourself if the template expects them.
 
 ```python
 from odoo import models
@@ -109,25 +81,13 @@ class ReportBusinessTrip(models.AbstractModel):
         }
 ```
 
-Important: once you customize `_get_report_values`, the default `doc_ids` / `doc_model` / `docs` are not injected automatically. Add them yourself if the template expects them.
-
 ## Paper formats
 
-Use `report.paperformat` when the default company format is wrong:
-
-```xml
-<record id="paperformat_trip_badge" model="report.paperformat">
-    <field name="name">Trip Badge</field>
-    <field name="format">custom</field>
-    <field name="page_height">80</field>
-    <field name="page_width">100</field>
-    <field name="orientation">Portrait</field>
-</record>
-```
+Use `report.paperformat` when the company default format is wrong.
 
 ## Report assets and fonts
 
-Custom fonts must be loaded through `web.report_assets_common`, not `web.assets_backend` or `web.assets_common`.
+Custom fonts must be loaded through `web.report_assets_common`, not backend/common web bundles.
 
 ```xml
 <template id="report_assets_common_custom_fonts" inherit_id="web.report_assets_common">
@@ -142,9 +102,4 @@ Custom fonts must be loaded through `web.report_assets_common`, not `web.assets_
 - `/report/html/<report_name>/<id>`
 - `/report/pdf/<report_name>/<id>`
 
-That is useful for debugging the rendered HTML separately from the PDF conversion step.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/reports.html
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/actions.html
+Use the HTML endpoint first when PDF output is wrong; it isolates template issues from PDF conversion issues.

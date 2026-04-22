@@ -222,9 +222,3 @@ If your inheritance silently fails:
 - Make sure the parent view is loaded first (add to `depends` if in another module).
 - If the XPath doesn't match, Odoo logs a warning. Check the server log when reloading views.
 - For mode issues: if you need a different `xml_id` for the result, use `mode="primary"` and give the inheriting view its own identity.
-
-## Sources
-
-- `odoo/addons/base/models/ir_ui_view.py` — `mode` field, `locate_node`.
-- `odoo/tools/template_inheritance.py` — position validator, `PYTHON_ATTRIBUTES` (line 20), the `<attribute>` add/remove/separator logic (lines 235–311).
-- `addons/web/static/src/views/view.js` line 344 — `js_class` resolution.

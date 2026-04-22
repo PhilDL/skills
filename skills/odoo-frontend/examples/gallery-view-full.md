@@ -367,17 +367,10 @@ registry.category("views").add("awesome_gallery_extended", {
 
 ## Want a richer tooltip?
 
-The renderer above uses the browser-native `title=` attribute — works everywhere with zero wiring. For Odoo's styled tooltip (with rich HTML, delays, placement) use `useTooltip` from `@web/core/tooltip/tooltip_hook` in the renderer's `setup()` and switch the attribute to `t-att-data-tooltip` plus a `data-tooltip-template` (or `data-tooltip-info`). See `references/custom-view-tutorial.md` Step 13 for both wiring patterns.
+The renderer above uses the browser-native `title=` attribute, which works everywhere with zero wiring. For Odoo's styled tooltip, use `useTooltip` from `@web/core/tooltip/tooltip_hook` in the renderer's `setup()` and switch to `t-att-data-tooltip` plus `data-tooltip-template` (or `data-tooltip-info`).
 
 ## What's verified vs what's from the walkthrough
 
 All framework bits are verified against Odoo 19.0 source — `registry.category("views")`, `Layout`, `useModel` pattern (manually done here without `useModel` because we use a non-RelationalModel), `webSearchRead` with `bin_size: true`, `KeepLast`, `/web/image`, `switchView`, `useService("action")`/`useService("orm")`, `js_class` resolution.
 
 The specific arch attributes, the SCSS, the renderer structure, and the pagination wiring are design choices adaptable to your needs.
-
-## Sources
-
-- 18.0 walkthrough: https://www.odoo.com/documentation/18.0/developer/tutorials/master_odoo_web_framework/02_create_gallery_view.html
-- 19.0 starter: https://github.com/odoo/tutorials/tree/19.0/awesome_gallery
-- 19.0 reference view implementations: https://github.com/odoo/odoo/tree/19.0/addons/web/static/src/views
-- 19.0 hierarchy (community custom-view reference): https://github.com/odoo/odoo/tree/19.0/addons/web_hierarchy

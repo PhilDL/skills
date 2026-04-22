@@ -120,12 +120,3 @@ Use one of these designs:
 - or move filtering and paging to the server and make the sidebar state drive the ORM query.
 
 Do not fetch one page from the server and then pretend a client-side filter is global; that produces missing or unstable results.
-
-## Sources
-
-- `sources/odoo/content/developer/tutorials/master_odoo_web_framework/03_customize_kanban_view.rst`
-- `sources/odootutorials/awesome_shelter/static/src/views/kanban_view.js`
-- `sources/odootutorials/awesome_shelter/views/views.xml`
-- `sources/odoo/content/developer/reference/frontend/hooks.rst`
-- `sources/odoo/content/developer/reference/frontend/owl_components.rst`
-- `sources/odoo/content/developer/reference/frontend/registries.rst`

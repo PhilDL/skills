@@ -266,9 +266,3 @@ registry.category("views").add("my_partner_kanban", {
     Renderer: MyPartnerKanbanRenderer,
 });
 ```
-
-## Files referenced
-
-- `odoo/addons/base/models/ir_ui_view.py` — `mode` Selection, `locate_node`.
-- `odoo/tools/template_inheritance.py` — `apply_inheritance_specs`, `PYTHON_ATTRIBUTES`.
-- `addons/web/static/src/views/view.js` line 344 — `js_class` resolution.

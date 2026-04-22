@@ -1,6 +1,6 @@
 ---
 name: features-actions-and-cron
-description: Returned action dictionaries, database-backed Odoo actions, and the correct way to design scheduled jobs with batching and `_commit_progress`.
+description: Returned action dictionaries, server actions, and the correct way to design scheduled jobs with batching and `_commit_progress`.
 ---
 
 # Actions and Cron
@@ -9,16 +9,7 @@ Backend Odoo code often bridges into the client with action dicts, or into backg
 
 ## Action return values from Python
 
-A method can return:
-
-- `False`: close the current dialog
-- string: client-action tag or numeric action identifier
-- number: action database ID or external ID
-- dict: inline action descriptor
-
-Most backend button flows return a dict.
-
-## Window action pattern
+In practice, most backend button flows should return a dict. `False` is the usual "close dialog" case.
 
 ```python
 return {
@@ -31,27 +22,9 @@ return {
 }
 ```
 
-Key fields:
+## Server actions are for declarative/admin flows
 
-- `res_model`
-- `views`
-- `res_id` when opening a specific form record
-- `domain`
-- `context`
-- `target` (`current`, `main`, `new`, `fullscreen`)
-
-## Server actions
-
-Use `ir.actions.server` for declarative or admin-driven automation, not as a replacement for normal Python module code.
-
-States from the docs:
-
-- `code`
-- `object_create`
-- `object_write`
-- `multi`
-
-The `code` state can set an `action` variable that gets returned to the client.
+Use `ir.actions.server` for admin-driven automation, not as a replacement for normal module code.
 
 ```xml
 <record id="trip_server_action" model="ir.actions.server">
@@ -70,18 +43,16 @@ if record:
 </record>
 ```
 
-Evaluation context includes `model`, `record`, `records`, `env`, `datetime`, `dateutil`, `time`, `timezone`, `log`, and `Warning`.
+Treat that evaluation context as privileged server-side execution.
 
 ## Report and client actions
 
-- `ir.actions.report`: binds a QWeb report to a model and print menu
-- `ir.actions.client`: hands off to a client-side tag
-
-Keep report template details in the dedicated reports reference; use this file mainly for how actions connect backend logic to those outputs.
+- `ir.actions.report`: bind a QWeb report to a model and print menu
+- `ir.actions.client`: hand off to a client-side tag
 
 ## Scheduled actions (`ir.cron`)
 
-Cron jobs should process a batch, commit progress, and return. Do not write infinite loops or self-rescheduling logic.
+Cron jobs should process a batch, commit progress, and return.
 
 ```python
 def _cron_process_ready_trips(self, *, limit=300):
@@ -92,48 +63,21 @@ def _cron_process_ready_trips(self, *, limit=300):
     self.env["ir.cron"]._commit_progress(len(records), remaining=remaining)
 ```
 
-Guidance from the docs:
-
-- each call should usually take only a few seconds
+- each call should stay short
 - the framework commits after each batch
-- the framework will re-call as needed
-- do not reschedule the job yourself
+- the framework re-calls as needed
+- do not reschedule the same cron manually
 
-## Manual looping inside cron
+## If you must manage the loop yourself
 
-When you must manage the loop yourself:
-
-```python
-def _cron_process_trip_queue(self):
-    assert self.env.context.get("cron_id"), "Run only inside cron jobs"
-    records = self.search([("state", "=", "ready")])
-    self.env["ir.cron"]._commit_progress(remaining=len(records))
-
-    for record in records:
-        record = record.try_lock_for_update().filtered_domain([("state", "=", "ready")])
-        if not record:
-            continue
-        try:
-            record._process_one()
-            if not self.env["ir.cron"]._commit_progress(1):
-                break
-        except Exception:
-            self.env.cr.rollback()
-            raise
-```
-
-The important pattern is not the exact body. It is:
+Keep the pattern, not the exact code:
 
 1. lock
-2. re-check domain
+2. re-check the domain
 3. do bounded work
-4. commit progress
+4. call `_commit_progress(...)`
 5. stop when the scheduler asks you to
 
 ## Do not call cron methods directly
 
-The actions docs explicitly say not to call cron functions directly. Use the scheduler or the documented trigger methods when you need to execute them on purpose.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/actions.html
+Use the scheduler or the documented trigger methods when you need to execute them on purpose.

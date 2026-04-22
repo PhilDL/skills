@@ -1,46 +1,30 @@
 ---
 name: core-orm-models-recordsets
-description: Model kinds, recordset behavior, inheritance modes, reserved fields, and the backend mental model for writing Python model code that works with Odoo instead of against it.
+description: Recordset behavior, inheritance modes, reserved fields, and the ORM rules that actually change how Odoo backend model code should be written.
 ---
 
 # ORM Models and Recordsets
 
-Write backend code against recordsets, not against rows or ad-hoc SQL. Most bugs in Odoo backend code come from forgetting that `self` may be empty, multi-record, cached, prefetched, or delegated.
+The generic ORM concepts are assumed. Keep this file for the recordset and inheritance rules that regularly break backend patches.
 
-## Pick the right model class
+## Model choice only matters at the edges
 
-```python
-from odoo import fields, models
+- `models.Model`: normal persisted records.
+- `models.AbstractModel`: shared behavior or non-record helpers.
+- `models.TransientModel`: wizard data; keep `_log_access` enabled.
 
-
-class BusinessTrip(models.Model):
-    _name = "business.trip"
-    _description = "Business Trip"
-
-    name = fields.Char(required=True)
-```
-
-- `models.Model`: normal persisted business records.
-- `models.AbstractModel`: shared behavior, no standalone table of business records.
-- `models.TransientModel`: wizard/temporary data. Keep `_log_access` enabled.
-
-## Recordsets are ordered collections
-
-Methods are called on recordsets, not a single record by default.
+## Recordsets are not single rows
 
 ```python
 def action_confirm(self):
-    for trip in self:
-        if trip.state == "draft":
-            trip.state = "confirmed"
+    for trip in self.filtered(lambda t: t.state == "draft"):
+        trip.state = "confirmed"
 ```
 
-Important consequences:
-
 - `self` may contain 0, 1, or many records.
-- iterating yields singletons
-- duplicates are still possible in recordsets
-- reading a non-relational field on a multi-record recordset raises
+- duplicates are still possible.
+- iterating yields singletons.
+- reading a scalar field on a multi-record recordset raises.
 
 Use:
 
@@ -48,38 +32,25 @@ Use:
 - `self.mapped("field_name")` for non-relational multi-record reads
 - set operations `|`, `&`, `-` when staying in recordset land
 
-## Field access is active-record style
+## Prefer field access that stays inside the ORM
 
-```python
-trip.name = "Conference 2026"
-responsible_name = trip.partner_id.name
-dynamic_value = trip[field_name]
-```
+Prefer `record[field_name]` over `getattr(record, field_name)` for dynamic field names so the lookup stays inside ORM field semantics.
 
-Prefer `record[field_name]` over `getattr(record, field_name)` when the field name is dynamic. It stays inside the field API instead of exposing arbitrary object attributes.
-
-## Automatic and reserved fields matter
-
-Common automatic fields:
-
-- `id`
-- `create_date`, `create_uid`
-- `write_date`, `write_uid`
-- `display_name`
-
-Reserved field names unlock behavior:
+## Reserved fields with behavior attached
 
 - `name`: display label source
 - `active`: archive/unarchive support
-- `state`: workflow/status conventions
 - `parent_id`, `parent_path`: tree semantics and `child_of` / `parent_of`
 - `company_id`: multi-company consistency checks
 
 If you opt into tree semantics with `parent_path`, declare it with `index=True`.
 
-## Declare constraints and indexes as model attributes
+## Constraints and indexes are model attributes
 
 ```python
+from odoo import fields, models
+
+
 class BusinessTrip(models.Model):
     _name = "business.trip"
 
@@ -94,44 +65,18 @@ class BusinessTrip(models.Model):
     _name_idx = models.Index("(name)")
 ```
 
-This is the modern attribute-based path documented in the ORM reference and changelog.
+This attribute-based path is the modern one documented in the ORM reference and changelog.
 
 ## Inheritance modes
 
-### Classical inheritance: new model built from another
-
-```python
-class BusinessDocument(models.Model):
-    _name = "business.document"
-
-    name = fields.Char()
-
-
-class BusinessTrip(models.Model):
-    _name = "business.trip"
-    _inherit = ["business.document"]
-
-    destination = fields.Char()
-```
-
-Use when the new model should be its own model name and table semantics.
-
-### Extension: patch an existing model in place
-
-```python
-class ResPartner(models.Model):
-    _inherit = "res.partner"
-
-    trip_count = fields.Integer()
-```
-
-Use when augmenting a model from another module.
-
-### Delegation: composition via `_inherits`
+- Classical inheritance: new model name, borrowed behavior.
+- Extension via `_inherit = "existing.model"`: patch an existing model in place.
+- Delegation via `_inherits`: compose through a `Many2one` foreign key.
 
 ```python
 class TripProfile(models.Model):
     _name = "trip.profile"
+
     seat_preference = fields.Char()
 
 
@@ -150,7 +95,7 @@ Warnings from the docs still apply:
 
 ## Field incremental definition
 
-When extending a model, you can redefine a field with the same type to override attributes:
+When extending a model, redefine a field with the same type to override attributes:
 
 ```python
 class BusinessTrip(models.Model):
@@ -159,8 +104,4 @@ class BusinessTrip(models.Model):
     state = fields.Selection(help="Trip lifecycle state.")
 ```
 
-That is the supported way to refine metadata like `help`, `tracking`, defaults, or string labels.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/orm.html
+Use this to refine metadata such as `help`, `tracking`, defaults, or labels without redefining the whole model.

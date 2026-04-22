@@ -74,9 +74,3 @@ unpatch();
 ```
 
 That pattern is the safe way to localize behavioral changes in tests.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/patching_code.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_reference.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/owl_components.html

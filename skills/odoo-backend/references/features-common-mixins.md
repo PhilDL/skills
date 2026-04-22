@@ -1,11 +1,11 @@
 ---
 name: features-common-mixins
-description: The common backend mixins worth reusing before you invent custom plumbing: chatter, aliases, activities, UTM tracking, website publication/SEO, and ratings.
+description: "The common backend mixins worth reusing before inventing custom plumbing: chatter, aliases, and activities."
 ---
 
 # Common Mixins
 
-Before building custom messaging, aliasing, activity, or publication logic, check whether Odoo already ships the mixin. The backend docs cover a few mixins that save a lot of repeated code.
+Only keep the mixins that routinely replace a lot of custom backend plumbing. The broader feature catalog is not worth loading into context unless the task is specifically about it.
 
 ## `mail.thread`
 
@@ -29,18 +29,7 @@ Form view:
 <chatter open_attachments="True"/>
 ```
 
-Useful server-side methods from the docs:
-
-- `message_post(...)`
-- `message_post_with_template(...)`
-- `message_subscribe(...)`
-- `message_unsubscribe(...)`
-- `message_new(...)`
-- `message_update(...)`
-
-## Field tracking and custom subtypes
-
-Use `tracking=True` on fields, and override `_track_subtype(...)` when specific transitions should emit specific subtype notifications.
+Usual follow-ups are `tracking=True` on fields and occasional `_track_subtype(...)` overrides when status transitions need a custom subtype.
 
 ## `mail.alias.mixin`
 
@@ -50,8 +39,6 @@ Required overrides:
 
 - `_get_alias_model_name(vals)`
 - `_get_alias_values()`
-
-That is the supported route for patterns like "email this project address to create a task".
 
 ## `mail.activity.mixin`
 
@@ -63,43 +50,8 @@ class BusinessTrip(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
 ```
 
-This enables activity widgets and common activity flows without custom tables.
-
-## `utm.mixin`
-
-Use it when website-created records should capture campaign/source/medium from tracked URLs and cookies.
-
-Fields added:
-
-- `campaign_id`
-- `source_id`
-- `medium_id`
-
-## `website.published.mixin`
-
-Use it when backend records have a frontend page and need a publication toggle plus URL.
-
-Fields added:
-
-- `website_published`
-- `website_url` (computed; you must implement it)
-
-## `website.seo.metadata`
-
-Adds SEO metadata fields:
-
-- `website_meta_title`
-- `website_meta_description`
-- `website_meta_keywords`
-
-## `rating.mixin`
-
-Use when the model needs customer rating requests or rating aggregation instead of custom satisfaction plumbing.
+This enables activity widgets and scheduling flows without custom tables.
 
 ## Source-backed rule of thumb
 
-If the desired behavior is already modeled as chatter, aliasing, activities, tracking, or publication, prefer inheriting the mixin to inventing new tables and controllers.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/mixins.html
+If the behavior is chatter, aliasing, tracking, or activities, prefer the shipped mixin before inventing tables, mail routes, or controllers.

@@ -209,13 +209,3 @@ Dynamic `ir.asset` records are valid and have the same expressive power as manif
 3. Use `debug=assets`.
 4. Regenerate assets from the debug menu or restart the server.
 5. During active development, `--dev=xml` forces bundle freshness checks.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/assets.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_modules.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_reference.html
-- `sources/odootutorials/awesome_dashboard/__manifest__.py`
-- `sources/odootutorials/awesome_dashboard/static/src/dashboard_loader.js`
-- `sources/odootutorials/awesome_dashboard/static/src/dashboard/dashboard.js`
-- `sources/odootutorials/awesome_dashboard/static/src/dashboard/pie_chart/pie_chart.js`

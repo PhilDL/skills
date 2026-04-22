@@ -336,14 +336,3 @@ All the pieces in one module in the Odoo 19 community source:
 URL: https://github.com/odoo/odoo/tree/19.0/addons/web_hierarchy
 
 This is the cleanest community-source reference for a brand-new view type in 19.0. Study it before writing your own.
-
-## Files referenced
-
-- `odoo/addons/base/models/ir_ui_view.py` — `ir.ui.view.type` Selection, `_validate_view` dispatcher.
-- `odoo/addons/base/models/ir_actions.py` — `ir.actions.act_window.view.VIEW_TYPES`, `view_mode` Char.
-- `addons/web/models/ir_ui_view.py` — `get_view_info` / `_get_view_info`.
-- `addons/web/models/ir_http.py` — `session.view_info` population.
-- `addons/web/static/src/views/view.js` — registry validation (line 91) and `js_class` resolution (line 344).
-- `addons/web_hierarchy/` — full community example.
-- `https://raw.githubusercontent.com/odoo/tutorials/19.0/awesome_gallery/models/` — tutorial Python patterns.
-- `https://raw.githubusercontent.com/odoo/tutorials/19.0/awesome_kanban/views/views.xml` — `js_class` pattern.

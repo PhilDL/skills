@@ -167,12 +167,3 @@ When you need to extend Odoo frontend behavior, ask in this order:
 1. Is there a registry for this?
 2. If not, is there a service hook or component prop for it?
 3. Patch only if both answers are no.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/registries.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/framework_overview.html
-- https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_reference.html
-- `sources/odootutorials/awesome_clicker/static/src/clicker_provider.js`
-- `sources/odootutorials/awesome_dashboard/static/src/dashboard_loader.js`
-- `sources/odootutorials/awesome_dashboard/static/src/dashboard/dashboard_items.js`

@@ -1,31 +1,19 @@
 ---
 name: testing-backend-and-tours
-description: Python backend tests, Odoo test helpers, test tags, `Form`, `HttpCase`, tours, and query-count assertions for catching regressions before they reach production.
+description: Python backend tests, Odoo test helpers, tags, `Form`, `HttpCase`, tours, and query-count assertions for catching regressions before they ship.
 ---
 
 # Backend Testing and Tours
 
-Odoo backend tests are standard `unittest`-style Python tests with Odoo-specific base classes and helpers. Keep Python business logic in Python tests; use tours only when you need end-to-end browser and server interaction together.
+Use this file for the Odoo-specific pieces that matter in backend tests: class choice, `Form`, tags, tours, and query budgets.
 
-## Test package structure
-
-```text
-my_module/
-├── tests/
-│   ├── __init__.py
-│   ├── test_trip_flow.py
-│   └── test_trip_security.py
-```
-
-`tests/__init__.py` must import each test module or Odoo will not run it.
-
-## Default Python test classes
+## Base class choice
 
 - `TransactionCase`: default choice for model/business logic tests
 - `SingleTransactionCase`: share one transaction across tests in the class
 - `HttpCase`: use when browser or HTTP flows are involved
 
-Helpers exposed by the docs include:
+Helpers worth remembering:
 
 - `ref(...)`
 - `browse_ref(...)`
@@ -48,11 +36,6 @@ class TestBusinessTrip(TransactionCase):
 
 ## Tagging and test selection
 
-Default tags on Odoo test classes:
-
-- `standard`
-- `at_install`
-
 Common pattern for browser-heavy cases:
 
 ```python
@@ -72,15 +55,11 @@ odoo-bin --test-tags "standard,-slow"
 odoo-bin --test-tags "/my_module:TestBusinessTrip.test_confirm_trip"
 ```
 
-## Use `Form` for form-style model flows
+## Use `Form` for form-style flows
 
-When business logic depends on defaults, onchanges, or relational widget-like semantics, `Form` is usually a better test helper than calling `create()` with a giant dict.
+When business logic depends on defaults, onchanges, or relational widget-like semantics, `Form` is usually better than calling `create()` with a giant dict.
 
-## Tours: end-to-end integration tests
-
-Use tours when Python and JavaScript must cooperate in a real browser-like flow.
-
-Python side:
+## Tours are for end-to-end cooperation between Python and JS
 
 ```python
 from odoo.tests import HttpCase, tagged
@@ -96,14 +75,7 @@ Tour JS must be added to assets and registered in the tour registry.
 
 ## Debugging tours
 
-Documented options worth using locally:
-
-- `watch=True`
-- `debug=True`
-- `break: true`
-- `pause: true`
-
-These are the fastest way to stop guessing when a browser flow is flaky.
+Useful local flags include `watch=True`, `debug=True`, `break: true`, and `pause: true`.
 
 ## Query-count assertions
 
@@ -117,8 +89,3 @@ with self.assertQueryCount(11):
 ## Use the dedicated JS testing skill for frontend mechanics
 
 This reference keeps only the backend and integration angle. For Hoot, web test helpers, or mock-server specifics, load the `odoo-19-javascript-testing` skill instead.
-
-## Sources
-
-- https://www.odoo.com/documentation/19.0/developer/reference/backend/testing.html
-- https://www.odoo.com/documentation/19.0/developer/reference/cli.html
