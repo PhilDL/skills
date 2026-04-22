@@ -72,6 +72,12 @@ interface Project {
 interface SourceConfig {
   source: string;
   skill?: string;
+  skills?: string[];
+}
+
+interface NormalizedSourceConfig {
+  source: string;
+  skills: string[];
 }
 
 interface VendorConfig {
@@ -79,17 +85,19 @@ interface VendorConfig {
   skills: Record<string, string>; // sourceSkillName -> outputSkillName
 }
 
-function getSourceConfig(name: string, config: string | SourceConfig): Required<SourceConfig> {
+function getSourceConfig(name: string, config: string | SourceConfig): NormalizedSourceConfig {
   if (typeof config === "string") {
     return {
       source: config,
-      skill: name,
+      skills: [name],
     };
   }
 
+  const configuredSkills = config.skills ?? (config.skill ? [config.skill] : [name]);
+
   return {
     source: config.source,
-    skill: config.skill ?? name,
+    skills: [...new Set(configuredSkills)],
   };
 }
 
@@ -327,7 +335,10 @@ async function checkUpdates() {
     const behind = execSafe("git rev-list HEAD..@{u} --count", path);
     const count = behind ? Number.parseInt(behind) : 0;
     if (count > 0) {
-      const label = sourceConfig.skill === name ? name : `${name} (${sourceConfig.skill})`;
+      const label =
+        sourceConfig.skills.length === 1 && sourceConfig.skills[0] === name
+          ? name
+          : `${name} (${sourceConfig.skills.join(", ")})`;
       updates.push({ name: label, type: "source", behind: count });
     }
   }
@@ -361,7 +372,9 @@ function getExpectedSkillNames(): Set<string> {
 
   // Skills from submodules (generated skills can override the output skill name)
   for (const [name, config] of Object.entries(submodules)) {
-    expected.add(getSourceConfig(name, config).skill);
+    for (const skillName of getSourceConfig(name, config).skills) {
+      expected.add(skillName);
+    }
   }
 
   // Skills from vendors (use the output skill name)

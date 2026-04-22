@@ -1,6 +1,6 @@
 ---
 name: core-registries-and-extension-points
-description: Registry API, ordered categories, and the main Odoo frontend extension points such as actions, systray, main components, services, and parsers.
+description: Registry API, ordered categories, and the main Odoo frontend extension points such as actions, systray, command providers, lazy components, services, and parsers.
 ---
 
 # Registries and Extension Points
@@ -17,6 +17,7 @@ import { registry } from "@web/core/registry";
 const serviceRegistry = registry.category("services");
 const systrayRegistry = registry.category("systray");
 const actionRegistry = registry.category("actions");
+const commandProviderRegistry = registry.category("command_provider");
 ```
 
 The registry API you actually use:
@@ -48,6 +49,27 @@ Register client actions by tag:
 registry.category("actions").add("my_module.dashboard", Dashboard);
 ```
 
+### `command_provider`
+
+Use this for command-palette entries that should be available globally without taking permanent screen space.
+
+```js
+registry.category("command_provider").add("my_module.commands", {
+  provide(env) {
+    return [
+      {
+        name: "Open dashboard",
+        action() {
+          env.services.action.doAction("my_module.dashboard");
+        },
+      },
+    ];
+  },
+});
+```
+
+The source-backed shape is `provide(env, options?) => Array<{name, action}>`.
+
 ### `main_components`
 
 Add always-present top-level components rendered by `MainComponentsContainer`.
@@ -62,6 +84,20 @@ The descriptor shape is:
 
 - `Component`
 - optional `props`
+
+### `lazy_components`
+
+Register the implementation component that `LazyComponent` resolves after a named bundle loads.
+
+```js
+registry.category("lazy_components").add("AwesomeDashboard", AwesomeDashboard);
+```
+
+This is usually paired with:
+
+- a lightweight action-registry entry in `web.assets_backend`;
+- a named lazy bundle for the heavy implementation;
+- a `<LazyComponent .../>` loader component.
 
 ### `systray`
 
@@ -83,6 +119,22 @@ registry.category("systray").add("my_module.item", {
 ### `effects`
 
 Provide custom effect implementations consumed by the `effect` service.
+
+### Custom registries
+
+For pluggable dashboards, cards, or addon-defined extension slots, create your own category and consume it with `getAll()`.
+
+```js
+registry.category("my_dashboard").add("revenue_card", {
+  id: "revenue_card",
+  Component: RevenueCard,
+  props: (data) => ({ title: "Revenue", value: data.revenue }),
+});
+
+const items = registry.category("my_dashboard").getAll();
+```
+
+This is the clean way to keep a screen extensible without hardcoding every tile into one component.
 
 ### `formatters` and `parsers`
 
@@ -121,3 +173,6 @@ When you need to extend Odoo frontend behavior, ask in this order:
 - https://www.odoo.com/documentation/19.0/developer/reference/frontend/registries.html
 - https://www.odoo.com/documentation/19.0/developer/reference/frontend/framework_overview.html
 - https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_reference.html
+- `sources/odootutorials/awesome_clicker/static/src/clicker_provider.js`
+- `sources/odootutorials/awesome_dashboard/static/src/dashboard_loader.js`
+- `sources/odootutorials/awesome_dashboard/static/src/dashboard/dashboard_items.js`

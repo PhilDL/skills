@@ -21,7 +21,8 @@ Authoring custom `<field widget="...">` components. Every claim sourced from `od
 8. `fieldDependencies` and `relatedFields`
 9. `supportedTypes`, `supportedOptions`, `supportedAttributes`
 10. Reading and writing values
-11. Hooks you'll actually use
+11. Extending built-ins safely
+12. Hooks you'll actually use
 
 ---
 
@@ -358,7 +359,91 @@ update(changes, { save } = {}) {
 - Dirty-tracking and save-points
 - The "set field invalid" hook chain
 
-## 11. Hooks you'll actually use
+## 11. Extending built-ins safely
+
+When a widget only needs to add one behavior, prefer subclassing the core widget component and spreading the core descriptor instead of rebuilding the whole contract from scratch.
+
+### Extend a `char` widget and keep the existing descriptor
+
+```js
+import { charField } from "@web/views/fields/char/char_field";
+
+class NameGeneratorField extends charField.component {
+    static template = "my_module.NameGeneratorField";
+    static props = { ...charField.component.props };
+
+    generate() {
+        this.props.record.update({ [this.props.name]: "Bella" });
+    }
+}
+
+const nameGeneratorField = {
+    ...charField,
+    component: NameGeneratorField,
+};
+```
+
+This preserves the stock char-field parsing, supported types, and input semantics.
+
+### Extend `Many2OneField` with `buildM2OFieldDescription(...)`
+
+```js
+import { Many2OneField, buildM2OFieldDescription } from "@web/views/fields/many2one/many2one_field";
+
+const baseField = buildM2OFieldDescription(Many2OneField);
+
+class AnimalTypeManyToOne extends Many2OneField {
+    static template = "my_module.AnimalTypeManyToOne";
+    static props = { ...Many2OneField.props, imageField: { type: String } };
+}
+
+const animalTypeMany2One = {
+    ...baseField,
+    component: AnimalTypeManyToOne,
+    fieldDependencies: [
+        ...(baseField.fieldDependencies || []),
+        { name: "pictogram", type: "image" },
+    ],
+    extractProps({ options }) {
+        const props = baseField.extractProps(...arguments);
+        props.imageField = options.image_field;
+        return props;
+    },
+};
+```
+
+This is the safest pattern when you are still fundamentally a many2one widget and only need extra props, a custom template, or extra loaded fields.
+
+### Extend a statusbar field and keep the original template
+
+```js
+import { useService } from "@web/core/utils/hooks";
+import { statusBarField } from "@web/views/fields/statusbar/statusbar_field";
+
+class StatusbarRainbowManField extends statusBarField.component {
+    static props = {
+        ...statusBarField.component.props,
+        rainbowStages: { type: Array },
+    };
+    static template = statusBarField.component.template;
+
+    setup() {
+        super.setup();
+        this.effect = useService("effect");
+    }
+
+    async selectItem(item) {
+        super.selectItem(item);
+        if (this.props.rainbowStages.includes(item.value)) {
+            this.effect.add({ message: "A new happy life on the making" });
+        }
+    }
+}
+```
+
+This pattern is lower-risk than rewriting the widget because it preserves the original rendering and state transitions, then layers one side effect on top.
+
+## 12. Hooks you'll actually use
 
 | Hook | Where it lives | What it does |
 |---|---|---|
@@ -383,6 +468,7 @@ update(changes, { save } = {}) {
 - `addons/web/static/src/views/fields/char/char_field.js` — canonical simple widget.
 - `addons/web/static/src/views/fields/integer/integer_field.js` — numeric pattern.
 - `addons/web/static/src/views/fields/many2one/many2one_field.js` — relational pattern.
+- `addons/web/static/src/views/fields/statusbar/statusbar_field.js` — extend-with-side-effects pattern.
 - `addons/web/static/src/views/fields/image/image_field.js` — `fieldDependencies`, options shape.
 - `addons/web/static/src/views/fields/datetime/datetime_field.js` — dynamic `fieldDependencies`.
 - `addons/web/static/src/views/fields/phone/phone_field.js` — view-prefixed registration.
@@ -390,3 +476,6 @@ update(changes, { save } = {}) {
 - `addons/web/static/src/views/fields/numpad_decimal_hook.js` — `useNumpadDecimal`.
 - `addons/web/static/src/model/relational_model/record.js` — `record.update`.
 - `addons/web/static/src/model/relational_model/utils.js` — `useRecordObserver`.
+- `sources/odootutorials/awesome_shelter/static/src/fields/name_generator_field.js`
+- `sources/odootutorials/awesome_shelter/static/src/fields/animal_type_many_2_one.js`
+- `sources/odootutorials/awesome_shelter/static/src/fields/statusbar_rainbowman_field.js`

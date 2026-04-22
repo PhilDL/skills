@@ -1,3 +1,6 @@
 [submodule "sources/odoo"]
 	path = sources/odoo
 	url = https://github.com/odoo/documentation
+[submodule "sources/odootutorials"]
+	path = sources/odootutorials
+	url = https://github.com/odoo/tutorials

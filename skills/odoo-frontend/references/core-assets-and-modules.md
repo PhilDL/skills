@@ -1,6 +1,6 @@
 ---
 name: core-assets-and-modules
-description: Asset bundles, manifest directives, lazy loading, Odoo module transpilation, aliases, import rules, and common module-loading failures.
+description: Asset bundles, manifest directives, lazy loading, named lazy bundles, `LazyComponent`, Odoo module transpilation, aliases, import rules, and common module-loading failures.
 ---
 
 # Assets and Modules
@@ -128,6 +128,76 @@ await loadAssets({
 
 Inside components, the matching hook is `useAssets(...)`.
 
+## Named lazy bundles pair with `LazyComponent`
+
+The solution-backed dashboard pattern is:
+
+1. keep a tiny loader in `web.assets_backend`;
+2. move the heavy implementation into a named bundle;
+3. register the real implementation in `registry.category("lazy_components")`.
+
+Manifest shape:
+
+```python
+'assets': {
+    'web.assets_backend': [
+        'awesome_dashboard/static/src/**/*',
+        ('remove', 'awesome_dashboard/static/src/dashboard/**/*'),
+    ],
+    'awesome_dashboard.dashboard': [
+        'awesome_dashboard/static/src/dashboard/**/*',
+    ],
+}
+```
+
+Loader component:
+
+```js
+import { registry } from "@web/core/registry";
+import { LazyComponent } from "@web/core/assets";
+import { Component, xml } from "@odoo/owl";
+
+class AwesomeDashboardLoader extends Component {
+    static components = { LazyComponent };
+    static template = xml`
+        <LazyComponent bundle="'awesome_dashboard.dashboard'"
+                       Component="'AwesomeDashboard'"
+                       props="props"/>
+    `;
+}
+
+registry.category("actions").add("awesome_dashboard.dashboard", AwesomeDashboardLoader);
+```
+
+Actual implementation:
+
+```js
+registry.category("lazy_components").add("AwesomeDashboard", AwesomeDashboard);
+```
+
+The non-obvious part is the manifest `remove`: it keeps the heavy implementation out of the default backend bundle so the lazy bundle is not loaded twice.
+
+## `loadJS(...)` is the low-level fit for browser globals
+
+If a component needs a legacy browser global such as `Chart`, load it in `onWillStart` and tear down the instance in lifecycle hooks:
+
+```js
+import { loadJS } from "@web/core/assets";
+import { onMounted, onPatched, onWillStart, onWillUnmount } from "@odoo/owl";
+
+setup() {
+    onWillStart(() => loadJS("/web/static/lib/Chart/Chart.js"));
+    onMounted(() => this.renderChart());
+    onPatched(() => {
+        this.chart.destroy();
+        this.renderChart();
+    });
+    onWillUnmount(() => this.chart.destroy());
+}
+```
+
+Use this only for libraries that genuinely expose browser globals or do not fit normal module imports.
+
 ## `ir.asset` exists, but use it selectively
 
 Dynamic `ir.asset` records are valid and have the same expressive power as manifest directives, but the docs explicitly position them as mostly useful for website-style conditional assets. For normal backend addon work, keep asset declarations in `__manifest__.py`.
@@ -145,3 +215,7 @@ Dynamic `ir.asset` records are valid and have the same expressive power as manif
 - https://www.odoo.com/documentation/19.0/developer/reference/frontend/assets.html
 - https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_modules.html
 - https://www.odoo.com/documentation/19.0/developer/reference/frontend/javascript_reference.html
+- `sources/odootutorials/awesome_dashboard/__manifest__.py`
+- `sources/odootutorials/awesome_dashboard/static/src/dashboard_loader.js`
+- `sources/odootutorials/awesome_dashboard/static/src/dashboard/dashboard.js`
+- `sources/odootutorials/awesome_dashboard/static/src/dashboard/pie_chart/pie_chart.js`

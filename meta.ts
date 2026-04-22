@@ -1,6 +1,7 @@
 export interface SourceSkillMeta {
   source: string;
   skill?: string;
+  skills?: string[];
 }
 
 export interface VendorSkillMeta {
@@ -15,8 +16,12 @@ export interface VendorSkillMeta {
 export const submodules: Record<string, string | SourceSkillMeta> = {
   odoo: {
     source: "https://github.com/odoo/documentation",
-    skill: "odoo-frontend",
+    skills: ["odoo-frontend", "odoo-backend"],
   },
+  odootutorials: {
+    source: "https://github.com/odoo/tutorials",
+    skills: ["odoo-frontend"],
+  }
 };
 
 /**
