@@ -1,6 +1,6 @@
 ---
 name: odoo-backend
-description: "Use when creating, debugging, or reviewing Odoo 19 server-side Python or backend XML data: `models.Model`, fields/decorators, ORM queries, `__manifest__.py`, ACL/rules, `@route`, `ir.cron`, JSON-2 or legacy RPC integrations, QWeb reports, and backend tests. Not for Owl/web-client JavaScript, frontend assets, or client-side view/widget work except when incidental to a backend change."
+description: "Use when creating, debugging, or reviewing Odoo 19 server-side Python, backend XML data, or backend-driven tests and tours: `models.Model`, fields/decorators, ORM queries, `__manifest__.py`, ACL/rules, `@route`, `ir.cron`, JSON-2 or legacy RPC integrations, QWeb reports, `TransactionCase`, `HttpCase`, `Form`, `start_tour`, browser tours, and `--test-tags`. Triggers include Odoo tours, backend tests, Python test helpers, and tour launch/debug flows. Not for Owl/web-client JavaScript, frontend assets, Hoot tests, or client-side view/widget work except when incidental to a backend or tour test change."
 metadata:
   author: Philippe L'ATTENTION
   version: "2026.4.22"
