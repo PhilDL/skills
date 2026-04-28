@@ -1,0 +1,86 @@
+[
+  {
+    "id": "backend-model-test",
+    "query": "Add a computed Many2one field to an Odoo 19 model and write a TransactionCase for it.",
+    "expectedSkills": ["odoo-backend"],
+    "forbiddenSkills": ["odoo-frontend", "odoo-19-javascript-testing", "owl"],
+    "notes": "Backend ORM and Python test helpers should stay in the backend skill."
+  },
+  {
+    "id": "frontend-systray-client-action",
+    "query": "In Odoo 19, create a systray item that opens a client action and stores state in browser storage.",
+    "expectedSkills": ["odoo-frontend"],
+    "forbiddenSkills": ["odoo-backend", "odoo-19-javascript-testing"],
+    "notes": "Registries, systray, client actions, and browser-backed state are web-client extension points."
+  },
+  {
+    "id": "hoot-list-view-mock-server",
+    "query": "Write a Hoot test for an Odoo 19 list view that mocks ORM data with defineModels and mountView.",
+    "expectedSkills": ["odoo-19-javascript-testing"],
+    "forbiddenSkills": ["odoo-backend"],
+    "notes": "Hoot, defineModels, and mountView should route to the frontend JavaScript testing skill."
+  },
+  {
+    "id": "owl-reactivity-template",
+    "query": "Fix an Owl component that uses useState, t-foreach, and t-key; the child component does not rerender.",
+    "expectedSkills": ["owl"],
+    "forbiddenSkills": ["odoo-backend", "odoo-19-javascript-testing"],
+    "notes": "Generic Owl component semantics should not trigger the broader Odoo frontend skill."
+  },
+  {
+    "id": "frontend-field-widget",
+    "query": "Create a custom Odoo 19 field widget using standardFieldProps and extractProps.",
+    "expectedSkills": ["odoo-frontend"],
+    "forbiddenSkills": ["odoo-backend", "odoo-19-javascript-testing"],
+    "notes": "Field widgets and extractProps are Odoo web-client concerns."
+  },
+  {
+    "id": "frontend-test-timeout",
+    "query": "Debug an Odoo frontend component test where contains times out after a mocked RPC.",
+    "expectedSkills": ["odoo-19-javascript-testing"],
+    "forbiddenSkills": ["odoo-backend"],
+    "notes": "contains and mocked RPC behavior in a frontend test should route to the test skill."
+  },
+  {
+    "id": "generic-python",
+    "query": "Explain how Python dataclasses work in a generic CLI script.",
+    "expectedSkills": [],
+    "forbiddenSkills": ["odoo-backend", "odoo-frontend", "odoo-19-javascript-testing", "owl"],
+    "notes": "Generic Python does not need an Odoo skill."
+  },
+  {
+    "id": "generic-react-jest",
+    "query": "Write a Jest test for a React component unrelated to Odoo.",
+    "expectedSkills": [],
+    "forbiddenSkills": ["odoo-19-javascript-testing", "owl", "odoo-frontend", "odoo-backend"],
+    "notes": "The JavaScript testing skill explicitly excludes generic Jest/Vitest-only setups."
+  },
+  {
+    "id": "generic-django-postgres",
+    "query": "Create a PostgreSQL migration for a Django app.",
+    "expectedSkills": [],
+    "forbiddenSkills": ["odoo-backend", "odoo-frontend", "odoo-19-javascript-testing", "owl"],
+    "notes": "Non-Odoo backend work should not trigger Odoo skills."
+  },
+  {
+    "id": "coexistence-backend-frontend-review",
+    "query": "Review this Odoo 19 module: Python model security, XML access rules, and a web client view inheritance.",
+    "expectedSkills": ["odoo-backend", "odoo-frontend"],
+    "forbiddenSkills": ["odoo-19-javascript-testing", "owl"],
+    "notes": "Mixed backend/frontend review should select both relevant skills, but not testing or Owl internals."
+  },
+  {
+    "id": "coexistence-frontend-owl-client-action",
+    "query": "Build an Odoo client action with an Owl component that uses services and reactive state.",
+    "expectedSkills": ["odoo-frontend", "owl"],
+    "forbiddenSkills": ["odoo-backend", "odoo-19-javascript-testing"],
+    "notes": "The frontend skill handles Odoo services/client action wiring; the Owl skill handles component state."
+  },
+  {
+    "id": "backend-tour",
+    "query": "Write a browser tour for an Odoo backend feature launched with start_tour.",
+    "expectedSkills": ["odoo-backend"],
+    "forbiddenSkills": ["odoo-19-javascript-testing", "owl"],
+    "notes": "Backend-driven tours are covered by the backend skill, not Hoot."
+  }
+]
